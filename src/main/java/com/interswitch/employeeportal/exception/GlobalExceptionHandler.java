@@ -21,7 +21,7 @@ public class GlobalExceptionHandler {
 
     public ResponseEntity<ErrorDetails> handlePayrollException(PayrollException exception, WebRequest webRequest) {
         ErrorDetails errorDetails = new ErrorDetails(LocalDateTime.now(), exception.getMessage(), webRequest.getDescription(false));
-        return new ResponseEntity<>(errorDetails, HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>(errorDetails, exception.getHttpStatus());
     }
 
 

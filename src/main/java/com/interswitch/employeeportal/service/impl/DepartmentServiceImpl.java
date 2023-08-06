@@ -4,12 +4,14 @@ import com.interswitch.employeeportal.dto.DepartmentDto;
 import com.interswitch.employeeportal.dto.EmployeeDto;
 import com.interswitch.employeeportal.entity.Department;
 import com.interswitch.employeeportal.entity.Employee;
+import com.interswitch.employeeportal.exception.PayrollException;
 import com.interswitch.employeeportal.exception.ResourceNotFoundException;
 import com.interswitch.employeeportal.repository.DepartmentRepository;
 import com.interswitch.employeeportal.repository.EmployeeRepository;
 import com.interswitch.employeeportal.service.DepartmentService;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -39,6 +41,12 @@ public class DepartmentServiceImpl implements DepartmentService {
         if (managerId.isPresent()) {
             employee = employeeRepository.findById(managerId.get())
                     .orElseThrow(() -> new ResourceNotFoundException("Employee", "id", managerId));
+        }
+
+        //check if department already exists
+        Optional<Department> departmentCheck = departmentRepository.findByName(departmentDto.getName());
+        if (departmentCheck.isPresent()) {
+            throw new PayrollException(HttpStatus.CONFLICT, "Department already exists");
         }
 
         Department department = mapToEntity(departmentDto);
