@@ -40,7 +40,7 @@ public class DepartmentServiceImpl implements DepartmentService {
 
         if (managerId.isPresent()) {
             employee = employeeRepository.findById(managerId.get())
-                    .orElseThrow(() -> new ResourceNotFoundException("Employee", "id", managerId));
+                    .orElseThrow(() -> new ResourceNotFoundException("Employee", "id", departmentDto.getManagerId()));
         }
 
         //check if department already exists
@@ -81,7 +81,12 @@ public class DepartmentServiceImpl implements DepartmentService {
 
         if (managerId.isPresent()) {
             employee = employeeRepository.findById(managerId.get())
-                    .orElseThrow(() -> new ResourceNotFoundException("Employee", "id", managerId));
+                    .orElseThrow(() -> new ResourceNotFoundException("Employee", "id", departmentDto.getManagerId()));
+        }
+
+        Optional<Department> departmentCheck = departmentRepository.findByName(departmentDto.getName());
+        if (departmentCheck.isPresent()) {
+            throw new PayrollException(HttpStatus.CONFLICT, "Department already exists");
         }
 
         department.setName(departmentDto.getName());

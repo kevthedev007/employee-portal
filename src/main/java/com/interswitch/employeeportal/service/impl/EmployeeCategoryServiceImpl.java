@@ -2,14 +2,17 @@ package com.interswitch.employeeportal.service.impl;
 
 import com.interswitch.employeeportal.dto.EmployeeCategoryDto;
 import com.interswitch.employeeportal.entity.EmployeeCategory;
+import com.interswitch.employeeportal.exception.PayrollException;
 import com.interswitch.employeeportal.exception.ResourceNotFoundException;
 import com.interswitch.employeeportal.repository.EmployeeCategoryRepository;
 import com.interswitch.employeeportal.repository.EmployeeRepository;
 import com.interswitch.employeeportal.service.EmployeeCategoryService;
 import org.modelmapper.ModelMapper;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -25,6 +28,10 @@ public class EmployeeCategoryServiceImpl implements EmployeeCategoryService {
 
     @Override
     public EmployeeCategoryDto createEmployeeCategory(EmployeeCategoryDto employeeCategoryDto) {
+        Optional<EmployeeCategory> categoryOptional = employeeCategoryRepository.findByName(employeeCategoryDto.getName());
+        if (categoryOptional.isPresent()) {
+            throw new PayrollException(HttpStatus.CONFLICT, "employee category already exists");
+        }
         EmployeeCategory employeeCategory = mapToEntity(employeeCategoryDto);
         EmployeeCategory employeeCategoryFromDb = employeeCategoryRepository.save(employeeCategory);
         return mapToDto(employeeCategoryFromDb);
@@ -50,6 +57,11 @@ public class EmployeeCategoryServiceImpl implements EmployeeCategoryService {
     public EmployeeCategoryDto updateEmployeeCategory(EmployeeCategoryDto employeeCategoryDto, Long id) {
         EmployeeCategory employeeCategoryFromDb = employeeCategoryRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("EmployeeCategory", "id", id));
+
+        Optional<EmployeeCategory> categoryOptional = employeeCategoryRepository.findByName(employeeCategoryDto.getName());
+        if (categoryOptional.isPresent()) {
+            throw new PayrollException(HttpStatus.CONFLICT, "employee category already exists");
+        }
 
         employeeCategoryFromDb.setName(employeeCategoryDto.getName());
         employeeCategoryFromDb.setDescription(employeeCategoryDto.getDescription());
